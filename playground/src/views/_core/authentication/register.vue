@@ -56,6 +56,36 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'confirmPassword',
       label: $t('authentication.confirmPassword'),
+      // 让确认密码独占一行
+      formItemClass: 'col-span-2',
+    },
+    // Date of Birth (left column)
+    {
+      component: 'DatePicker',
+      fieldName: 'dateOfBirth',
+      label: $t('authentication.dateOfBirth'),
+      componentProps: {
+        placeholder: $t('Date of birth'),
+        format: 'YYYY-MM-DD',
+        valueFormat: 'YYYY-MM-DD',
+      },
+      // 默认两列布局下占1列
+      formItemClass: 'col-span-1',
+    },
+    // Role (right column)
+    {
+      component: 'VbenSelect',
+      fieldName: 'role',
+      label: $t('authentication.role'),
+      componentProps: {
+        placeholder: $t('authentication.role'),
+        options: [
+          { label: 'Client', value: 'client' },
+          { label: 'Support', value: 'support' },
+        ],
+      },
+      rules: z.string().min(1, { message: $t('authentication.roleRequired') }),
+      formItemClass: 'col-span-1',
     },
     {
       component: 'VbenCheckbox',
@@ -77,6 +107,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.boolean().refine((value) => !!value, {
         message: $t('authentication.agreeTip'),
       }),
+      // 协议独占一行
+      formItemClass: 'col-span-2',
     },
   ];
 });

@@ -35,6 +35,10 @@ interface Props {
    * @zh_CN 按钮文本
    */
   submitButtonText?: string;
+  /**
+   * @zh_CN 表单栅格布局（TailwindCSS）
+   */
+  wrapperClass?: string;
 }
 
 defineOptions({
@@ -48,6 +52,8 @@ const props = withDefaults(defineProps<Props>(), {
   submitButtonText: '',
   subTitle: '',
   title: '',
+  // 默认采用两列布局（中等屏幕起），便于将两个字段放在同一行
+  wrapperClass: 'grid-cols-1 md:grid-cols-2',
 });
 
 const emit = defineEmits<{
@@ -62,6 +68,8 @@ const [Form, formApi] = useVbenForm(
     },
     schema: computed(() => props.formSchema),
     showDefaultActions: false,
+    // 透传布局类，启用多列布局
+    wrapperClass: computed(() => props.wrapperClass),
   }),
 );
 
