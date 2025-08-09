@@ -56,6 +56,34 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'confirmPassword',
       label: $t('authentication.confirmPassword'),
+      formItemClass: 'col-span-2',
+    },
+    // Date of Birth
+    {
+      component: 'DatePicker',
+      fieldName: 'dateOfBirth',
+      label: $t('authentication.dateOfBirth'),
+      componentProps: {
+        placeholder: $t('Date of birth'),
+        format: 'YYYY-MM-DD',
+        valueFormat: 'YYYY-MM-DD',
+      },
+      formItemClass: 'col-span-1',
+    },
+    // Role
+    {
+      component: 'VbenSelect',
+      fieldName: 'role',
+      label: $t('authentication.role'),
+      componentProps: {
+        placeholder: $t('authentication.role'),
+        options: [
+          { label: 'Client', value: 'client' },
+          { label: 'Support', value: 'support' },
+        ],
+      },
+      rules: z.string().min(1, { message: $t('authentication.roleRequired') }),
+      formItemClass: 'col-span-1',
     },
     {
       component: 'VbenCheckbox',
@@ -77,6 +105,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.boolean().refine((value) => !!value, {
         message: $t('authentication.agreeTip'),
       }),
+      formItemClass: 'col-span-2',
     },
   ];
 });
