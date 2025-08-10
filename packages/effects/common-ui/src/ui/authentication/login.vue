@@ -132,17 +132,19 @@ defineExpose({
         {{ $t('authentication.forgetPassword') }}
       </span>
     </div>
-    <VbenButton
-      :class="{
-        'cursor-wait': loading,
-      }"
-      :loading="loading"
-      aria-label="login"
-      class="w-full"
-      @click="handleSubmit"
-    >
-      {{ submitButtonText || $t('common.login') }}
-    </VbenButton>
+    <slot name="submit" :loading="loading" :on-submit="handleSubmit">
+      <VbenButton
+        :class="{
+          'cursor-wait': loading,
+        }"
+        :loading="loading"
+        aria-label="login"
+        class="w-full"
+        @click="handleSubmit"
+      >
+        {{ submitButtonText || $t('common.login') }}
+      </VbenButton>
+    </slot>
 
     <div
       v-if="showCodeLogin || showQrcodeLogin"
