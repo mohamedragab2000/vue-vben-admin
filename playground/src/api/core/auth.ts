@@ -1,3 +1,5 @@
+import Axios from 'axios';
+
 import { baseRequestClient, requestClient } from '#/api/request';
 
 export namespace AuthApi {
@@ -22,9 +24,17 @@ export namespace AuthApi {
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data, {
-    withCredentials: true,
-  });
+  const response = await Axios.post<AuthApi.LoginResult>(
+    'http://localhost:8000/api/login',
+    data,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    },
+  );
+  return response.data;
 }
 
 /**

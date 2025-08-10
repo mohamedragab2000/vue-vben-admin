@@ -92,7 +92,7 @@
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
-    "vue-tsc": "catalog:"
+    "vue-tsc": "^3.0.5"
   },
   "engines": {
     "node": ">=20.10.0",
