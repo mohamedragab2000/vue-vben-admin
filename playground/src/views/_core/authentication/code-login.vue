@@ -8,6 +8,7 @@ import { AuthenticationCodeLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { message } from 'ant-design-vue';
+import axios from 'axios';
 
 defineOptions({ name: 'CodeLogin' });
 
@@ -15,22 +16,42 @@ const loading = ref(false);
 const CODE_LENGTH = 6;
 const loginRef =
   useTemplateRef<InstanceType<typeof AuthenticationCodeLogin>>('loginRef');
-function sendCodeApi(phoneNumber: string) {
+async function sendCodeApi(phoneNumber: string) {
   message.loading({
     content: $t('page.auth.sendingCode'),
     duration: 0,
     key: 'sending-code',
   });
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      message.success({
-        content: $t('page.auth.codeSentTo', [phoneNumber]),
-        duration: 3,
-        key: 'sending-code',
-      });
-      resolve({ code: '123456', phoneNumber });
-    }, 3000);
-  });
+  
+  try {
+    const response = await axios.put(
+      'http://localhost:8000/api/login/phone/request-otp',
+      { 
+        phone_number: phoneNumber
+      },
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    message.success({
+      content: $t('page.auth.codeSentTo', [phoneNumber]),
+      duration: 3,
+      key: 'sending-code',
+    });
+    
+    return response.data;
+  } catch (error) {
+    message.error({
+      content: error.response?.data?.message || $t('page.auth.codeSendFailed'),
+      duration: 3,
+      key: 'sending-code',
+    });
+    throw error;
+  }
 }
 const formSchema = computed((): VbenFormSchema[] => {
   return [
