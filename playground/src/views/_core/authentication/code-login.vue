@@ -8,7 +8,8 @@ import { AuthenticationCodeLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { message } from 'ant-design-vue';
-import axios from 'axios';
+
+import { requestClient } from '#/api/request';
 
 defineOptions({ name: 'CodeLogin' });
 
@@ -17,6 +18,8 @@ const CODE_LENGTH = 6;
 const loginRef =
   useTemplateRef<InstanceType<typeof AuthenticationCodeLogin>>('loginRef');
 async function sendCodeApi(phoneNumber: string) {
+  console.log('sendCodeApi called with phone:', phoneNumber);
+  
   message.loading({
     content: $t('page.auth.sendingCode'),
     duration: 0,
@@ -24,29 +27,30 @@ async function sendCodeApi(phoneNumber: string) {
   });
   
   try {
-    const response = await axios.put(
-      'http://localhost:8000/api/login/phone/request-otp',
+    console.log('Making API request to send OTP...');
+    const response = await requestClient.put(
+      '/login/phone/request-otp',
       { 
         phone_number: phoneNumber
-      },
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
       }
     );
 
+    console.log('API response:', response);
     message.success({
       content: $t('page.auth.codeSentTo', [phoneNumber]),
       duration: 3,
       key: 'sending-code',
     });
     
-    return response.data;
-  } catch (error) {
+    return response;
+  } catch (error: any) {
+    console.error('API error:', error);
+    console.error('Error response:', error.response);
+    
+    const errorMessage = error.response?.data?.message || error.message || $t('page.auth.codeSendFailed');
+    
     message.error({
-      content: error.response?.data?.message || $t('page.auth.codeSendFailed'),
+      content: errorMessage,
       duration: 3,
       key: 'sending-code',
     });
@@ -81,23 +85,31 @@ const formSchema = computed((): VbenFormSchema[] => {
           return text;
         },
         handleSendCode: async () => {
-          // 模拟发送验证码
-          // Simulate sending verification code
+          // 发送验证码
+          // Send verification code
           loading.value = true;
-          const formApi = loginRef.value?.getFormApi();
-          if (!formApi) {
+          try {
+            const formApi = loginRef.value?.getFormApi();
+            if (!formApi) {
+              loading.value = false;
+              throw new Error('formApi is not ready');
+            }
+            await formApi.validateField('phoneNumber');
+            const isPhoneReady = await formApi.isFieldValid('phoneNumber');
+            if (!isPhoneReady) {
+              loading.value = false;
+              throw new Error('Phone number is not Ready');
+            }
+            const { phoneNumber } = await formApi.getValues();
+            console.log('Sending OTP to:', phoneNumber);
+            await sendCodeApi(phoneNumber);
+            console.log('OTP sent successfully');
+          } catch (error) {
+            console.error('Error sending OTP:', error);
+            // Error is already handled in sendCodeApi, just need to prevent UI issues
+          } finally {
             loading.value = false;
-            throw new Error('formApi is not ready');
           }
-          await formApi.validateField('phoneNumber');
-          const isPhoneReady = await formApi.isFieldValid('phoneNumber');
-          if (!isPhoneReady) {
-            loading.value = false;
-            throw new Error('Phone number is not Ready');
-          }
-          const { phoneNumber } = await formApi.getValues();
-          await sendCodeApi(phoneNumber);
-          loading.value = false;
         },
         placeholder: $t('authentication.code'),
       },
